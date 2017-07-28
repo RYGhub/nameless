@@ -20,6 +20,8 @@ async def on_message(message):
             # Add the user to the database
             session.add(user)
             session.commit()
+            # Display when an user joins the game
+            print(f"{user} has joined Nameless!")
             await user.message(nlessbot, "Welcome to Nameless!\nThere is no game here yet.\nOr maybe there is.")
             loop.create_task(call_every_x_seconds(advance_to_chapter_one, 10, user=user))
         # If the user is playing the prologue, answer appropriately
@@ -34,10 +36,16 @@ async def on_message(message):
             data = session.query(FirstChapter).filter_by(user_id=user.id).first()
             if data.current_question == 0:
                 data.game_topic = message["text"]
+                # Send the message
+                await user.message(nlessbot, "Hmmm. Interesting.")
+                # Don't accept answers during the cooldown period
+                data.current_question = -1
+                session.commit()
+                # Wait a bit before sending another message
+                await asyncio.sleep(5)
+                # Start accepting answers
                 data.current_question = 1
                 session.commit()
-                await user.message(nlessbot, "Hmmm. Interesting.")
-                await asyncio.sleep(5)
                 await user.message(nlessbot, "When do you think it will be released?")
             elif data.current_question == 1:
                 if "half" in message["text"].lower() and "life" in message["text"].lower():
