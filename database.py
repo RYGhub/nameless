@@ -21,7 +21,6 @@ class User(Base):
     language = Column(String)
     chapter = Column(Integer)
 
-
     async def message(self, bot, text):
         await bot.sendMessage(self.id, text)
 
@@ -62,6 +61,24 @@ class FirstChapter(Base):
         self.user_id = user.id
         self.current_question = 0
 
+
+class SecondChapter(Base):
+    """The save data of the second chapter"""
+    __tablename__ = "secondchapter"
+
+    mic_user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
+    mic_user = relationship("User", foreign_keys=[mic_user_id])
+
+    button_user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
+    button_user = relationship("User", foreign_keys=[button_user_id])
+
+    target_button = Column(Integer, nullable=False)
+    button_pressed = Column(Integer)
+
+    def __init__(self, micuser, buttonuser, target):
+        self.mic_user_id = micuser.id
+        self.button_user_id = buttonuser.id
+        self.target_button = target
 
 # If the script is run as standalone, generate the database
 if __name__ == "__main__":
